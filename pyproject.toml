@@ -1,0 +1,18 @@
+[project]
+name = "book-release-checklist"
+version = "1.0.0"
+description = "Local-first Python CLI for authors planning a book release: checklist, tasks, dates, and CSV export."
+requires-python = ">=3.9"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [{name = "Asdale Dynamics, LLC"}]
+
+[project.scripts]
+book-release = "book_release.cli:main"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["book_release"]

@@ -26,12 +26,36 @@ Run as a module:
 
 ```bash
 python3 -m book_release --data my_book.json add "Finish chapter 1" --due 2027-02-01
+python3 -m book_release --data my_book.json add "Write blurb"
 python3 -m book_release --data my_book.json list
 python3 -m book_release --data my_book.json done 1
 python3 -m book_release --data my_book.json export release_plan.csv
 ```
 
-Or make `book_release/cli.py` executable and run it directly.
+Or install it for a `book-release` command:
+
+```bash
+pip install .
+book-release --data my_book.json list
+```
+
+## Example workflow
+
+```bash
+# Start a plan for your book
+python3 -m book_release --data my_book.json add "Finish chapter 1" --due 2027-02-01
+python3 -m book_release --data my_book.json add "Write back-cover blurb" --due 2027-02-15
+python3 -m book_release --data my_book.json add "Format manuscript for KDP"
+
+# See where things stand
+python3 -m book_release --data my_book.json list
+
+# Mark work complete as you finish it
+python3 -m book_release --data my_book.json done 1
+
+# Export to CSV to open in Excel, Google Sheets, or Numbers
+python3 -m book_release --data my_book.json export release_plan.csv
+```
 
 ## Commands
 
@@ -45,13 +69,15 @@ Or make `book_release/cli.py` executable and run it directly.
 | `export FILE.csv` | Export all tasks to CSV |
 
 Data is stored in `book_release.json` by default. Use `--data` to point at a
-different file per book/project.
+different file per book or project.
 
 ## CSV export
 
 ```
 id,title,due,done,created_at
 1,Finish chapter 1,2027-02-01,1,2026-...
+2,Write back-cover blurb,2027-02-15,0,2026-...
+3,Format manuscript for KDP,,0,2026-...
 ```
 
 Open the export in Excel, Google Sheets, or Numbers.

@@ -3,11 +3,14 @@
 from __future__ import annotations
 
 import csv
+import io
 import os
 import tempfile
 import unittest
+from unittest.mock import patch
 from datetime import date, timedelta
 
+from book_release.cli import main
 from book_release.tasks import Task, TaskStore
 
 
@@ -95,3 +98,50 @@ class TestTaskStore(unittest.TestCase):
         self.assertIsNone(self.store.get(1))
         self.assertEqual(len(self.store.list()), 1)
         self.assertFalse(self.store.remove(999))
+
+
+class TestCLI(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.NamedTemporaryFile(suffix=".json", delete=False)
+        self.tmp.close()
+
+    def tearDown(self):
+        os.unlink(self.tmp.name)
+
+    def _run(self, *args):
+        argv = ["--data", self.tmp.name, *args]
+        buf = io.StringIO()
+        with patch("sys.stdout", buf), patch("sys.stderr", buf):
+            code = main(argv)
+        return code, buf.getvalue()
+
+    def test_add_and_list_output(self):
+        code, out = self._run("add", "Finish chapter 1", "--due", "2027-02-01")
+        self.assertEqual(code, 0)
+        code, out = self._run("list")
+        self.assertEqual(code, 0)
+        self.assertIn("Finish chapter 1", out)
+        self.assertIn("2027-02-01", out)
+
+    def test_done_then_list_shows_checked(self):
+        self._run("add", "Task one")
+        self._run("done", "1")
+        code, out = self._run("list")
+        self.assertEqual(code, 0)
+        self.assertIn("[x]", out)
+
+    def test_export_writes_csv(self):
+        self._run("add", "Task A", "--due", "2027-02-01")
+        csv_path = self.tmp.name + ".csv"
+        code, out = self._run("export", csv_path)
+        self.assertEqual(code, 0)
+        with open(csv_path, newline="", encoding="utf-8") as f:
+            rows = list(csv.reader(f))
+        self.assertEqual(rows[0], ["id", "title", "due", "done", "created_at"])
+        os.unlink(csv_path)
+
+    def test_unknown_task_errors(self):
+        code, out = self._run("done", "999")
+        self.assertEqual(code, 1)
+        self.assertIn("not found", out)
+
