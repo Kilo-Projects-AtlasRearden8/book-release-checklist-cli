@@ -1,0 +1,7 @@
+book_release.json
+*.csv
+__pycache__/
+*.py[cod]
+.env
+.venv/
+.env
